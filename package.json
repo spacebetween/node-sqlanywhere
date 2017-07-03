@@ -6,9 +6,6 @@
     "JSONStream": "latest"
   },
   "main": "src/SQLAnywhere.js",
-  "scripts": {
-    "test": "mocha"
-  },
   "homepage": "http://github.com/spacebetween/node-sqlanywhere/",
   "repository": {
     "type": "git",
@@ -22,9 +19,4 @@
   	"sql"
   ],
   "author": "Michael Vigor <michael@spacebetween.co.uk>",
-  "devDependencies": {
-    "bluebird": "^3.4.6",
-    "chai": "^3.5.0",
-    "mocha": "^3.0.2"
-  }
 }
