@@ -1,31 +1,27 @@
 {
-  "name": "sybase",
-  "version": "1.0.13",
-  "description": "A simple node.js wrapper around a java/jconnect app that provides easy access to Sybase Databases without having to install odbc or freetds.",
+  "name": "sqlanywhere",
+  "version": "0.0.1",
+  "description": "A simple node.js wrapper around a go cli that provides easy access to SQL Anywhere data sources.",
   "dependencies": {
     "JSONStream": "latest"
   },
-  "main": "src/SybaseDB.js",
+  "main": "src/SQLAnywhere.js",
   "scripts": {
     "test": "mocha"
   },
-  "homepage": "http://github.com/rodhoward/node-sybase/",
+  "homepage": "http://github.com/spacebetween/node-sqlanywhere/",
   "repository": {
     "type": "git",
-    "url": "git://github.com/rodhoward/node-sybase.git"
+    "url": "git://github.com/spacebetween/node-sqlanywhere.git"
   },
   "license": "MIT",
   "keywords" : [
   	"database",
   	"sybase",
-  	"jconnect",
-  	"sql",
-  	"java"
+  	"sqlanywhere",
+  	"sql"
   ],
-  "author": "Rod Howard <rod.howard@gmail.com>",
-  "bugs": {
-    "url": "https://github.com/rodhoward/node-sybase/issues"
-  },
+  "author": "Michael Vigor <michael@spacebetween.co.uk>",
   "devDependencies": {
     "bluebird": "^3.4.6",
     "chai": "^3.5.0",
