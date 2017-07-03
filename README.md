@@ -1,35 +1,20 @@
-node-sybase
+node-sqlanywhere
 ---------
 
-A simple node.js wrapper around a Java application that provides easy access to Sybase databases via jconn3. The main goal is to allow easy installation without the requirements of installing and configuring odbc or freetds. You do however have to have java 1.5 or newer installed.
+A fork of the [node-sybase](https://github.com/rodhoward/node-sybase) library, this is a simple node.js wrapper around a Go CLI that provides easy access to SQL Anywhere 12.0 data sources. A static binary of the sqlago-connector go program is included and compiled as a 32 bit windows executable, tested using SQL Anywher 12.0 on Windows Server 2008.
 
-requirements
-------------
-
-* java 1.5+
-
-install
--------
-
-### git
-
-```bash
-git clone git://github.com/rodhoward/node-sybase.git
-cd node-sybase
-node-gyp configure build
-```
 ### npm
 
 ```bash
-npm install sybase
+npm install sqlanywhere
 ```
 
 quick example
 -------------
 
 ```javascript
-var Sybase = require('sybase'),
-	db = new Sybase('host', port, 'dbName', 'username', 'pw');
+var SQLAnywhere = require('sqlanywhere'),
+	db = new SQLAnywhere('dbName', 'username', 'pw');
 
 db.connect(function (err) {
   if (err) return console.log(err);
@@ -48,15 +33,5 @@ db.connect(function (err) {
 api
 -------------
 
-The api is super simple. It makes use of standard node callbacks so that it can be easily used with promises. The only thing not covered in the example above is the option to print some timing stats to the console as well as to specify the location of the Java application bridge, which shouldn't need to change.
+The api is super simple. It makes use of standard node callbacks so that it can be easily used with promises. 
 
-```javascirpt 
-var logTiming = true,
-	javaJarPath = './JavaSybaseLink/dist/JavaSybaseLink.jar',
-	db = new Sybase('host', port, 'dbName', 'username', 'pw', logTiming, javaJarPath);
-```
-
-The java Bridge now optionally looks for a "sybaseConfig.properties" file in which you can configure jconnect properties to be included in the connection. This should allow setting properties like:
-```properties
-ENCRYPT_PASSWORD=true
-```

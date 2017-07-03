@@ -2,28 +2,21 @@ var spawn = require('child_process').spawn;
 var JSONStream = require('JSONStream');
 var fs = require("fs");
 
-//FIXME: this is bad should be a way to expose this jar file in the npm package 
-//so that it can be called properly from parent packages.
-var PATH_TO_JAVA_BRIDGE1 = process.env.PWD + "/node_modules/sybase/JavaSybaseLink/dist/JavaSybaseLink.jar";
-var PATH_TO_JAVA_BRIDGE2 = "./JavaSybaseLink/dist/JavaSybaseLink.jar";
+var PATH_TO_GO_CONNECTOR = "./sqlago-connector/sqlago-connector.exe";
 
-function Sybase(host, port, dbname, username, password, logTiming, pathToJavaBridge)
+function SQLAnywhere(dbname, username, password, logTiming, pathToGoConnector)
 {
     this.connected = false;
-    this.host = host;
-    this.port = port;
     this.dbname = dbname;
     this.username = username;
     this.password = password;    
     this.logTiming = (logTiming == true);
     
-    this.pathToJavaBridge = pathToJavaBridge;
-    if (this.pathToJavaBridge === undefined)
+    this.pathToGoConnector = pathToGoConnector;
+    if (this.pathToGoConnector === undefined)
     {
-    	if (fs.existsSync(PATH_TO_JAVA_BRIDGE1))
-    		this.pathToJavaBridge = PATH_TO_JAVA_BRIDGE1;
-    	else
-    		this.pathToJavaBridge = PATH_TO_JAVA_BRIDGE2;
+    	if (fs.existsSync(PATH_TO_GO_CONNECTOR))
+    		this.pathToGoConnector = PATH_TO_GO_CONNECTOR;
     }
 
     this.queryCount = 0;
@@ -32,49 +25,49 @@ function Sybase(host, port, dbname, username, password, logTiming, pathToJavaBri
     this.jsonParser = JSONStream.parse();
 }
 
-Sybase.prototype.connect = function(callback)
+SQLAnywhere.prototype.connect = function(callback)
 {
     var that = this;
-    this.javaDB = spawn('java',["-jar",this.pathToJavaBridge, this.host, this.port, this.dbname, this.username, this.password]);
+    this.sqlaConn = spawn(this.pathToGoConnector, ["-dsn", 'DSN=' + this.dbname + ';UID=' + this.username _ ';PWD=' + this.password]);
 
     var hrstart = process.hrtime();
-	this.javaDB.stdout.once("data", function(data) {
+	this.sqlaConn.stdout.once("data", function(data) {
 		if ((data+"").trim() != "connected")
 		{
 			callback(new Error("Error connecting " + data));
 			return;
 		}
 
-		that.javaDB.stderr.removeAllListeners("data");
+		that.sqlaConn.stderr.removeAllListeners("data");
 		that.connected = true;
 
 		// set up normal listeners.		
-		that.javaDB.stdout.pipe(that.jsonParser).on("data", function(jsonMsg) { that.onSQLResponse.call(that, jsonMsg); });
-		that.javaDB.stderr.on("data", function(err) { that.onSQLError.call(that, err); });
+		that.sqlaConn.stdout.pipe(that.jsonParser).on("data", function(jsonMsg) { that.onSQLResponse.call(that, jsonMsg); });
+		that.sqlaConn.stderr.on("data", function(err) { that.onSQLError.call(that, err); });
 
 		callback(null, data);
 	});
 
 	// handle connection issues.
-    this.javaDB.stderr.once("data", function(data) {
-    	that.javaDB.stdout.removeAllListeners("data");
-    	that.javaDB.kill();
+    this.sqlaConn.stderr.once("data", function(data) {
+    	that.sqlaConn.stdout.removeAllListeners("data");
+    	that.sqlaConn.kill();
     	callback(new Error(data));
     });   
 };
 
-Sybase.prototype.disconnect = function()
+SQLAnywhere.prototype.disconnect = function()
 {
-	this.javaDB.kill();
+	this.sqlaConn.kill();
 	this.connected = false;	
 }
 
-Sybase.prototype.isConnected = function() 
+SQLAnywhere.prototype.isConnected = function() 
 {
     return this.connected;
 };
 
-Sybase.prototype.query = function(sql, callback) 
+SQLAnywhere.prototype.query = function(sql, callback) 
 {
     if (this.isConnected === false)
     {
@@ -96,11 +89,11 @@ Sybase.prototype.query = function(sql, callback)
     
     this.currentMessages[msg.msgId] = msg;
 
-    this.javaDB.stdin.write(strMsg + "\n");
+    this.sqlaConn.stdin.write(strMsg + "\n");
     console.log("sql request written: " + strMsg);
 };
 
-Sybase.prototype.onSQLResponse = function(jsonMsg)
+SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
 {
     var err = null;
 	var request = this.currentMessages[jsonMsg.msgId];
@@ -110,21 +103,21 @@ Sybase.prototype.onSQLResponse = function(jsonMsg)
 	if (result.length === 1)
 		result = result[0]; //if there is only one just return the first RS not a set of RS's
 
-	var currentTime = (new Date()).getTime();
-	var sendTimeMS = currentTime - jsonMsg.javaEndTime;
-	hrend = process.hrtime(request.hrstart);
-	var javaDuration = (jsonMsg.javaEndTime - jsonMsg.javaStartTime);
+	//var currentTime = (new Date()).getTime();
+	//var sendTimeMS = currentTime - jsonMsg.javaEndTime;
+	//hrend = process.hrtime(request.hrstart);
+	//var javaDuration = (jsonMsg.javaEndTime - jsonMsg.javaStartTime);
 
     if (jsonMsg.error !== undefined)
         err = new Error(jsonMsg.error);
 
 
-	if (this.logTiming)
-		console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, javaDuration, sendTimeMS, request.sql);
+	//if (this.logTiming)
+	//	console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, javaDuration, sendTimeMS, request.sql);
 	request.callback(err, result);
 };
 
-Sybase.prototype.onSQLError = function(data)
+SQLAnywhere.prototype.onSQLError = function(data)
 {
 	var error = new Error(data);
 
@@ -142,4 +135,4 @@ Sybase.prototype.onSQLError = function(data)
     });
 };
 
-module.exports = Sybase;
+module.exports = SQLAnywhere;
