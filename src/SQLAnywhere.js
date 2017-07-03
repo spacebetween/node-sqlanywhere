@@ -28,7 +28,7 @@ function SQLAnywhere(dbname, username, password, logTiming, pathToGoConnector)
 SQLAnywhere.prototype.connect = function(callback)
 {
     var that = this;
-    this.sqlaConn = spawn(this.pathToGoConnector, ["-dsn", 'DSN=' + this.dbname + ';UID=' + this.username _ ';PWD=' + this.password]);
+    this.sqlaConn = spawn(this.pathToGoConnector, ["-dsn", 'DSN=' + this.dbname + ';UID=' + this.username + ';PWD=' + this.password]);
 
     var hrstart = process.hrtime();
 	this.sqlaConn.stdout.once("data", function(data) {
