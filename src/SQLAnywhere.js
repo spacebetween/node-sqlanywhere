@@ -1,8 +1,10 @@
 var spawn = require('child_process').spawn;
 var JSONStream = require('JSONStream');
 var fs = require("fs");
+var path = require("path");
 
-var PATH_TO_GO_CONNECTOR = "./sqlago-connector/sqlago-connector.exe";
+var PATH_TO_GO_CONNECTOR1 = path.normalize('./node_modules/sqlanywhere/sqlago-connector/sqlago-connector.exe');
+var PATH_TO_GO_CONNECTOR2 = path.normalize('./sqlago-connector/sqlago-connector.exe');
 
 function SQLAnywhere(dbname, username, password, logTiming, pathToGoConnector)
 {
@@ -13,10 +15,13 @@ function SQLAnywhere(dbname, username, password, logTiming, pathToGoConnector)
     this.logTiming = (logTiming == true);
     
     this.pathToGoConnector = pathToGoConnector;
+
     if (this.pathToGoConnector === undefined)
     {
-    	if (fs.existsSync(PATH_TO_GO_CONNECTOR))
-    		this.pathToGoConnector = PATH_TO_GO_CONNECTOR;
+        if (fs.existsSync(PATH_TO_GO_CONNECTOR1))
+            this.pathToGoConnector = PATH_TO_GO_CONNECTOR1;
+        else
+            this.pathToGoConnector = PATH_TO_GO_CONNECTOR2;
     }
 
     this.queryCount = 0;
@@ -81,7 +86,7 @@ SQLAnywhere.prototype.query = function(sql, callback)
     msg.msgId = this.queryCount;
     msg.sql = sql;
     msg.sentTime = (new Date()).getTime();
-    var strMsg = JSON.stringify(msg).replace(/[\n]/g, '\\n');
+    var strMsg = JSON.stringify(msg).replace(/(\r\n|\n|\r)/gm,"");
     msg.callback = callback;
     msg.hrstart = hrstart;
 
@@ -96,24 +101,28 @@ SQLAnywhere.prototype.query = function(sql, callback)
 SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
 {
     var err = null;
+    var result = null;
+
 	var request = this.currentMessages[jsonMsg.msgId];
 	delete this.currentMessages[jsonMsg.msgId];
 
-	var result = jsonMsg.result;
-	if (result.length === 1)
-		result = result[0]; //if there is only one just return the first RS not a set of RS's
-
-	//var currentTime = (new Date()).getTime();
-	//var sendTimeMS = currentTime - jsonMsg.javaEndTime;
-	//hrend = process.hrtime(request.hrstart);
-	//var javaDuration = (jsonMsg.javaEndTime - jsonMsg.javaStartTime);
+    console.log(jsonMsg);
 
     if (jsonMsg.error !== undefined)
         err = new Error(jsonMsg.error);
 
+    if (jsonMsg.result){
+    	result = jsonMsg.result;
+    	if (result.length === 1)
+    		result = result[0]; //if there is only one just return the first RS not a set of RS's
+    }
+	var currentTime = (new Date()).getTime();
+	var sendTimeMS = currentTime - jsonMsg.goEndTime;
+	hrend = process.hrtime(request.hrstart);
+	var goDuration = (jsonMsg.goEndTime - jsonMsg.goStartTime);
 
-	//if (this.logTiming)
-	//	console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, javaDuration, sendTimeMS, request.sql);
+	if (this.logTiming)
+		console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, goDuration, sendTimeMS, request.sql);
 	request.callback(err, result);
 };
 
