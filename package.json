@@ -5,6 +5,7 @@
   "dependencies": {
     "JSONStream": "latest"
   },
+  "files": ["sqlago-connector"],
   "main": "src/SQLAnywhere.js",
   "homepage": "http://github.com/spacebetween/node-sqlanywhere/",
   "repository": {
