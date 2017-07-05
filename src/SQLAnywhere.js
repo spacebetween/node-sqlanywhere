@@ -3,8 +3,7 @@ var JSONStream = require('JSONStream');
 var fs = require("fs");
 var path = require("path");
 
-var PATH_TO_GO_CONNECTOR1 = path.normalize('./node_modules/sqlanywhere/sqlago-connector/sqlago-connector.exe');
-var PATH_TO_GO_CONNECTOR2 = path.normalize('./sqlago-connector/sqlago-connector.exe');
+var PATH_TO_GO_CONNECTOR = path.resolve(__dirname + '/../sqlago-connector/sqlago-connector.exe');
 
 function SQLAnywhere(dbname, username, password, logTiming, pathToGoConnector)
 {
@@ -18,10 +17,8 @@ function SQLAnywhere(dbname, username, password, logTiming, pathToGoConnector)
 
     if (this.pathToGoConnector === undefined)
     {
-        if (fs.existsSync(PATH_TO_GO_CONNECTOR1))
-            this.pathToGoConnector = PATH_TO_GO_CONNECTOR1;
-        else
-            this.pathToGoConnector = PATH_TO_GO_CONNECTOR2;
+        if (fs.existsSync(PATH_TO_GO_CONNECTOR))
+            this.pathToGoConnector = PATH_TO_GO_CONNECTOR;
     }
 
     this.queryCount = 0;
