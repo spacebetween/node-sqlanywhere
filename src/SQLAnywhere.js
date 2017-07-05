@@ -112,6 +112,8 @@ SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
     	result = jsonMsg.result;
     	if (result.length === 1)
     		result = result[0]; //if there is only one just return the first RS not a set of RS's
+        if (result === null)
+            result = [];        //return empty array rather than null for empty queries
     }
 	var currentTime = (new Date()).getTime();
 	var sendTimeMS = currentTime - jsonMsg.goEndTime;
