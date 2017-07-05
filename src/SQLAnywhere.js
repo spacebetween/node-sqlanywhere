@@ -98,7 +98,7 @@ SQLAnywhere.prototype.query = function(sql, callback)
 SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
 {
     var err = null;
-    var result = null;
+    var result = [];
 
 	var request = this.currentMessages[jsonMsg.msgId];
 	delete this.currentMessages[jsonMsg.msgId];
@@ -110,10 +110,9 @@ SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
 
     if (jsonMsg.result){
     	result = jsonMsg.result;
+
     	if (result.length === 1)
     		result = result[0]; //if there is only one just return the first RS not a set of RS's
-        if (result === null)
-            result = [];        //return empty array rather than null for empty queries
     }
 	var currentTime = (new Date()).getTime();
 	var sendTimeMS = currentTime - jsonMsg.goEndTime;
