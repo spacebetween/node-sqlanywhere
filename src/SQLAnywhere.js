@@ -103,8 +103,6 @@ SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
 	var request = this.currentMessages[jsonMsg.msgId];
 	delete this.currentMessages[jsonMsg.msgId];
 
-    console.log(jsonMsg);
-
     if (jsonMsg.error !== undefined)
         err = new Error(jsonMsg.error);
 
