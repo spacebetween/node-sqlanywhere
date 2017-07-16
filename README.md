@@ -13,8 +13,8 @@ quick example
 -------------
 
 ```javascript
-var SQLAnywhere = require('sqlanywhere'),
-	db = new SQLAnywhere('host', 'dbName', 'username', 'pw');
+var SQLAnywhere = require('sqlanywhere');
+var db = new SQLAnywhere('host', 'dbName', 'username', 'pw');
 
 db.connect(function (err) {
   if (err) return console.log(err);
