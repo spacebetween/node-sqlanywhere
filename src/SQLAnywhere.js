@@ -4,9 +4,10 @@ var fs = require("fs");
 
 var PATH_TO_GO_CONNECTOR = "./sqlago-connector/sqlago-connector.exe";
 
-function SQLAnywhere(dbname, username, password, logTiming, pathToGoConnector)
+function SQLAnywhere(host, dbname, username, password, logTiming, pathToGoConnector)
 {
     this.connected = false;
+    this.host = host;
     this.dbname = dbname;
     this.username = username;
     this.password = password;    
@@ -28,7 +29,15 @@ function SQLAnywhere(dbname, username, password, logTiming, pathToGoConnector)
 SQLAnywhere.prototype.connect = function(callback)
 {
     var that = this;
-    this.sqlaConn = spawn(this.pathToGoConnector, ["-dsn", 'DSN=' + this.dbname + ';UID=' + this.username _ ';PWD=' + this.password]);
+    var connectionParts = [
+      'DSN=' + this.dbname,
+      'UID=' + this.username,
+      'PWD=' + this.password
+    ];
+    if(this.host){
+      connectionParts.unshift('HOST=' + this.host);
+    }
+    this.sqlaConn = spawn(this.pathToGoConnector, ["-dsn", connectionParts.join(';')]);
 
     var hrstart = process.hrtime();
 	this.sqlaConn.stdout.once("data", function(data) {

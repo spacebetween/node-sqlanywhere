@@ -14,7 +14,7 @@ quick example
 
 ```javascript
 var SQLAnywhere = require('sqlanywhere'),
-	db = new SQLAnywhere('dbName', 'username', 'pw');
+	db = new SQLAnywhere('host', 'dbName', 'username', 'pw');
 
 db.connect(function (err) {
   if (err) return console.log(err);
