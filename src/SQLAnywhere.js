@@ -32,7 +32,7 @@ SQLAnywhere.prototype.connect = function(callback)
 {
     var that = this;
     var connectionParts = [
-      'DSN=' + this.dbname,
+      'DatabaseName=' + this.dbname,
       'UID=' + this.username,
       'PWD=' + this.password
     ];
