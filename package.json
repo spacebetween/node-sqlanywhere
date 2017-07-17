@@ -1,6 +1,6 @@
 {
   "name": "sqlanywhere",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple node.js wrapper around a go cli that provides easy access to SQL Anywhere data sources.",
   "dependencies": {
     "JSONStream": "latest"
