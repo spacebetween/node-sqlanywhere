@@ -5,7 +5,7 @@ var path = require("path");
 
 var PATH_TO_GO_CONNECTOR = path.resolve(__dirname + '/../sqlago-connector/sqlago-connector.exe');
 
-function SQLAnywhere(host, dbname, username, password, logTiming, pathToGoConnector)
+function SQLAnywhere(host, dbname, username, password, logTiming, pathToGoConnector, logger)
 {
     this.connected = false;
     this.host = host;
@@ -13,6 +13,7 @@ function SQLAnywhere(host, dbname, username, password, logTiming, pathToGoConnec
     this.username = username;
     this.password = password;    
     this.logTiming = (logTiming == true);
+    this.logger = logger || console.log;
     
     this.pathToGoConnector = pathToGoConnector;
 
@@ -96,12 +97,12 @@ SQLAnywhere.prototype.query = function(sql, callback)
     msg.callback = callback;
     msg.hrstart = hrstart;
 
-    console.log("this: " + this + " currentMessages: " +  this.currentMessages + " this.queryCount: " + this.queryCount);
+    this.logger("this: " + this + " currentMessages: " +  this.currentMessages + " this.queryCount: " + this.queryCount);
     
     this.currentMessages[msg.msgId] = msg;
 
     this.sqlaConn.stdin.write(strMsg + "\n");
-    console.log("sql request written: " + strMsg);
+    this.logger("sql request written: " + strMsg);
 };
 
 SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
@@ -127,7 +128,7 @@ SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
 	var goDuration = (jsonMsg.goEndTime - jsonMsg.goStartTime);
 
 	if (this.logTiming)
-		console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, goDuration, sendTimeMS, request.sql);
+		this.logger("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, goDuration, sendTimeMS, request.sql);
 	request.callback(err, result);
 };
 
