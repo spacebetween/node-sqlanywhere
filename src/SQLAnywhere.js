@@ -42,7 +42,6 @@ SQLAnywhere.prototype.connect = function(callback)
     }
     this.sqlaConn = spawn(this.pathToGoConnector, ["-dsn", connectionParts.join(';')]);
 
-    var hrstart = process.hrtime();
 	this.sqlaConn.stdout.once("data", function(data) {
 		if ((data+"").trim() != "connected")
 		{
@@ -86,7 +85,6 @@ SQLAnywhere.prototype.query = function(sql, callback)
     	callback(new Error("database isn't connected."));
     	return;
     }    
-    var hrstart = process.hrtime();
     this.queryCount++;
     
     var msg = {};
@@ -95,7 +93,6 @@ SQLAnywhere.prototype.query = function(sql, callback)
     msg.sentTime = (new Date()).getTime();
     var strMsg = JSON.stringify(msg).replace(/(\r\n|\n|\r)/gm,"");
     msg.callback = callback;
-    msg.hrstart = hrstart;
 
     this.logger("this: " + this + " currentMessages: " +  this.currentMessages + " this.queryCount: " + this.queryCount);
     
@@ -124,11 +121,10 @@ SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
     }
 	var currentTime = (new Date()).getTime();
 	var sendTimeMS = currentTime - jsonMsg.goEndTime;
-	hrend = process.hrtime(request.hrstart);
 	var goDuration = (jsonMsg.goEndTime - jsonMsg.goStartTime);
 
 	if (this.logTiming)
-		this.logger("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, goDuration, sendTimeMS, request.sql);
+		this.logger("Execution time: %dms dbSendTime: %d sql=%s", goDuration, sendTimeMS, request.sql);
 	request.callback(err, result);
 };
 
