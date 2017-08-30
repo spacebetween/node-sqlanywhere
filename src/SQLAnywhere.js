@@ -107,25 +107,27 @@ SQLAnywhere.prototype.onSQLResponse = function(jsonMsg)
     var err = null;
     var result = [];
 
-	var request = this.currentMessages[jsonMsg.msgId];
-	delete this.currentMessages[jsonMsg.msgId];
+  if(jsonMsg.msgId && this.currentMessages[jsonMsg.msgId]){
+    var request = this.currentMessages[jsonMsg.msgId];
+    delete this.currentMessages[jsonMsg.msgId];
 
-    if (jsonMsg.error !== undefined)
-        err = new Error(jsonMsg.error);
+      if (jsonMsg.error !== undefined)
+          err = new Error(jsonMsg.error);
 
-    if (jsonMsg.result){
-    	result = jsonMsg.result;
+      if (jsonMsg.result){
+        result = jsonMsg.result;
 
-    	if (result.length === 1)
-    		result = result[0]; //if there is only one just return the first RS not a set of RS's
-    }
-	var currentTime = (new Date()).getTime();
-	var sendTimeMS = currentTime - jsonMsg.goEndTime;
-	var goDuration = (jsonMsg.goEndTime - jsonMsg.goStartTime);
+        if (result.length === 1)
+          result = result[0]; //if there is only one just return the first RS not a set of RS's
+      }
+    var currentTime = (new Date()).getTime();
+    var sendTimeMS = currentTime - jsonMsg.goEndTime;
+    var goDuration = (jsonMsg.goEndTime - jsonMsg.goStartTime);
 
-	if (this.logTiming)
-		this.logger("Execution time: %dms dbSendTime: %d sql=%s", goDuration, sendTimeMS, request.sql);
-	request.callback(err, result);
+    if (this.logTiming)
+      this.logger("Execution time: %dms dbSendTime: %d sql=%s", goDuration, sendTimeMS, request.sql);
+    request.callback(err, result);
+  }
 };
 
 SQLAnywhere.prototype.onSQLError = function(data)
